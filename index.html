@@ -475,7 +475,7 @@ footer {
         <a href="#" onclick="showSection('about')">About</a>
         <a href="#" onclick="showSection('contact')">Contact</a>
         
-<a href="userdashbboard.html" id="navUserDashboard" style="display:none;">
+<a href="userdashboard.html" id="navUserDashboard" style="display:none;">
     User Dashboard
   </a>
   <a href="admindashboard.html" id="adminDashboardLink" style="display:none;">
@@ -1007,10 +1007,23 @@ function toggleFaq(element) {
 
   <!-- 🔥 Firebase Connection Code (STEP 5) -->
   <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import { 
+  getAuth, 
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  serverTimestamp,
+  getDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3gQMnJh0L8Bc6CNRJ_oTh6xqabVP2-P4",
