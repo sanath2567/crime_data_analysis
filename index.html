@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Crime Rate Analysis & Public Safety</title>
+<link rel="shortcut icon" href="crime-investigation.png" type="image/x-icon">
 
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -103,23 +104,21 @@ body {
 /* NAVBAR */
 nav {
     background-color: #0b3c5d;
-    padding: 15px;
+    padding: 12px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    z-index: 1000;
 }
 
-nav a {
-    color: white;
-    text-decoration: none;
-    margin: 0 12px;
-    font-weight: bold;
-}
-/* LOGO */
+/* keep logo fixed on the left */
 .logo {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 0 0 auto;
 }
 
 .logo img {
@@ -131,6 +130,80 @@ nav a {
     color: white;
     font-size: 20px;
     font-weight: bold;
+}
+
+/* Links container on the right */
+.nav-links {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1 1 auto;
+    min-width: 0; /* allow overflow handling */
+    overflow-x: auto; /* if too many items, allow horizontal scroll */
+}
+
+.nav-links a,
+.nav-links button {
+    color: white;
+    text-decoration: none;
+    margin: 0 6px;
+    font-weight: bold;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.nav-links a:hover,
+.nav-links button:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+/* small helper to center main content and provide consistent width */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* HERO: center content and constrain width */
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+    url('https://images.unsplash.com/photo-1550439062-609e1531270e');
+    background-size: cover;
+    color: white;
+    width: 100%;
+    padding: 80px 40px;
+    border-radius: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero img {
+    height: 70px;
+    margin-bottom: 15px;
+}
+
+.hero h1, .hero p {
+    max-width: 900px;
+}
+
+/* ensure nav does not wrap on very small screens; let it scroll */
+@media (max-width: 600px) {
+    nav { padding: 10px 12px; }
+    .nav-links { gap: 8px; }
+}
+
+/* wrap nav items into a column on very narrow screens if needed */
+@media (max-width: 360px) {
+    nav { flex-wrap: wrap; }
+    .nav-links { width: 100%; justify-content: flex-start; padding-top: 8px; }
 }
 
 
@@ -397,7 +470,7 @@ footer {
     <span>Crime Analytics</span>
 </div>
 
-    <div>
+    <div class="nav-links">
         <a href="#" onclick="showSection('home')">Home</a>
         <a href="#" onclick="showSection('about')">About</a>
         <a href="#" onclick="showSection('contact')">Contact</a>
@@ -416,6 +489,7 @@ footer {
 <a href="login.html" id="loginBtn">Login</a>
     <a href="login.html" id="signupBtn">Signup</a>
     </div>
+</nav>
 
 
   
@@ -585,14 +659,14 @@ footer {
 <section id="about">
 
     <!-- ABOUT SUB NAV -->
-    <div class="about-nav">
+    <div class="about-nav container">
         <button onclick="showAboutTab('about-overview')" class="active">Overview</button>
         <button onclick="showAboutTab('about-mission')">Mission & Vision</button>
         <button onclick="showAboutTab('about-tech')">Technology & Data</button>
     </div>
 
     <!-- ✅ STEP 2: WRAPPER FOR YOUR EXISTING CONTENT -->
-    <div id="about-overview" class="about-tab active">
+    <div id="about-overview" class="about-tab active container">
         <div id="about-mission" class="about-tab">
 
     <h1>🎯 Mission & Vision</h1>

@@ -7,10 +7,7 @@ let selections = {
   state: new Set()
 };
 
-/* THEME */
-themeToggle.onclick = () => {
-  document.body.classList.toggle("dark");
-};
+
 
 /* NOTES */
 function openNotes() {

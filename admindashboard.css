@@ -157,13 +157,7 @@ body {
   gap:1rem;
 }
 
-#themeToggle {
-  border:none;
-  background:rgba(255,255,255,0.25);
-  padding:0.4rem;
-  border-radius:50%;
-  cursor:pointer;
-}
+
 
 /* PROFILE */
 .profile {
