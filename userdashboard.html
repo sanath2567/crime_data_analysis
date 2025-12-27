@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crime Rate Analysis Dashboard</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const role = localStorage.getItem("role");
+
+  if (!isLoggedIn || role !== "user") {
+    window.location.href = "login.html";
+  }
+</script>
+
+
+<style>
+/* ===== CSS VARIABLES FOR THEMING ===== */
+:root {
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#1e293b;
+  --accent:#2563eb;
+  --sidebar-bg: linear-gradient(180deg, #1e3c72, #2a5298);
+}
+
+body.dark {
+  --bg:#020617;
+  --card:#0f172a;
+  --text:#e5e7eb;
+  --accent:#38bdf8;
+  --sidebar-bg: linear-gradient(180deg, #0c1425, #1e293b);
+}
+
+/* ===== SIDEBAR TOGGLE ===== */
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 10px;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 70px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card);
+  color: var(--text);
+  padding: 12px 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  z-index: 1000 !important;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.nav-links li {
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.nav-links li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-links li.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+}
+
+.profile {
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: var(--card);
+  color: var(--text);
+  min-width: 120px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.profile-menu div {
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.profile-menu div:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.profile:hover .profile-menu {
+  display: block;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed !important;
+  top: 70px !important; /* Start below navbar */
+  left: 0 !important;
+  width: 260px !important;     /* FIXED WIDTH */
+  height: calc(100vh - 70px) !important; /* Adjust height to account for navbar */
+  background: var(--sidebar-bg);
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  z-index: 999 !important; /* Below navbar but above content */
+  display: block !important; /* Ensure sidebar is visible */
+}
+
+.main-content {
+  margin-left: 260px !important;     /* SAME AS SIDEBAR WIDTH */
+  margin-top: 70px !important;       /* SAME AS NAVBAR HEIGHT */
+  width: calc(100% - 260px) !important;
+  padding: 20px;
+  min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+}
+
+
+body {
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+  padding-top: 70px; /* Account for fixed navbar */
+}
+
+h2 {
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2rem;
+}
+
+/* ===== FILTERS ===== */
+.filters {
+  width: 220px; /* Reduced to fit within sidebar padding */
+}
+
+.filter-group {
+  margin-bottom: 15px;
+}
+
+.filter-group label {
+  display: block;
+  color: #e6fffb;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.filters .form-select {
+  background-color: rgba(15, 61, 62, 0.85);
+  border: 1px solid #2dd4bf;
+  color: #ecfeff;
+  backdrop-filter: blur(6px);
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
+.filters .form-select:focus {
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.45);
+  border-color: #5eead4;
+}
+
+.filters .btn-primary {
+  background: linear-gradient(90deg, #0ea5e9, #2dd4bf);
+  border: none;
+  font-weight: 700;
+  color: #042f2e;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.filters .btn-primary:hover {
+  box-shadow: 0 0 20px rgba(45, 212, 191, 0.7);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* ===== SUMMARY CARD ===== */
+.stat-card {
+  background: var(--card);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15);
+}
+
+.stat-card h5 {
+  color: var(--text);
+  opacity: 0.7;
+  margin-bottom: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+
+.stat-card h3 {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 0;
+}
+
+/* ===== CHART CARDS ===== */
+.chart-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15);
+}
+
+/* ===== CANVAS ===== */
+canvas {
+  height: 300px !important;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Large screens (desktops) - Default layout */
+@media (min-width: 1025px) {
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+
+  .main-content {
+    margin-left: 260px !important;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 220px !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Small screens (mobile) */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: block !important;
+  }
+
+  .sidebar {
+    width: 280px !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    margin-top: 70px !important;
+    width: 100% !important;
+    padding: 15px !important;
+  }
+
+  .navbar {
+    padding: 12px 15px !important;
+  }
+
+  .logo {
+    font-size: 1.4rem !important;
+  }
+
+  .nav-links li {
+    padding: 6px 12px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .row {
+    --bs-gutter-x: 1rem !important;
+  }
+
+  .chart-card {
+    padding: 15px !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  body {
+    padding-top: 60px !important; /* Account for smaller navbar on mobile */
+  }
+
+  .navbar {
+    height: 60px !important;
+  }
+
+  .sidebar {
+    top: 60px !important;
+    height: calc(100vh - 60px) !important;
+  }
+
+  .main-content {
+    margin-top: 60px !important;
+  }
+
+  .logo {
+    font-size: 1.2rem !important;
+  }
+
+  .nav-right {
+    gap: 0.5rem !important;
+  }
+
+  .profile-menu div {
+    padding: 0.4rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .nav-links li {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .stat-card {
+    padding: 20px !important;
+  }
+
+  .stat-card h3 {
+    font-size: 32px !important;
+  }
+}
+
+.nav-logo {
+  height: 38px;
+}
+
+.nav-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.role-badge {
+  background: var(--accent);
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.logout-btn {
+  background: #dc2626;
+  border: none;
+  color: white;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  background: #b91c1c;
+}
+
+#themeToggle {
+  border:none;
+  background:rgba(255,255,255,0.25);
+  padding:0.4rem;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <div class="logo">CRIME ANALYTICS</div>
+    </div>
+
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li class="active">Dashboard</li>
+      </ul>
+
+      <button id="themeToggle">🌓</button>
+
+      <div class="profile">
+        User ▾
+        <div class="profile-menu">
+          <div onclick="logout()">Sign Out</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <!-- FILTERS -->
+      <div class="filters">
+        <div class="filter-group">
+          <label>State:</label>
+          <select id="stateFilter" class="form-select">
+            <option value="">All States</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Year:</label>
+          <select id="yearFilter" class="form-select">
+            <option value="">All Years</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Crime Type:</label>
+          <select id="crimeFilter" class="form-select">
+            <option value="">All Crime Types</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary w-100 mt-3" onclick="applyFilters()">Apply Filters</button>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT -->
+    <main class="main-content">
+      <h2 class="text-center mb-4">CRIME DASHBOARD – USER VIEW</h2>
+
+      <!-- SUMMARY -->
+      <div class="row mb-4">
+        <div class="col">
+          <div class="stat-card">
+            <h5>Total Incidents</h5>
+            <h3 id="totalCrimes">0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="chart-card">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="chart-card">
+            <canvas id="pieChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col">
+          <div class="chart-card">
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4 g-4">
+        <div class="col-md-6">
+          <div class="chart-card">
+            <h6 class="text-center mb-3">Crime Type vs Area Type (Clustered)</h6>
+            <canvas id="clusterBarChart"></canvas>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="chart-card">
+            <h6 class="text-center mb-3">Year-wise Crime Category (Stacked)</h6>
+            <canvas id="stackedBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="userdashboard.js"></script>
+<script>
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
+}
+
+// Sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar = document.querySelector('.sidebar');
+  
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      if (window.innerWidth <= 1024) {
+        if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+  }
+
+  // Theme toggle functionality
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeToggle.innerHTML = isDark ? '☀️' : '🌓';
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+      themeToggle.innerHTML = '☀️';
+    } else {
+      themeToggle.innerHTML = '🌓';
+    }
+  }
+});
+</script>

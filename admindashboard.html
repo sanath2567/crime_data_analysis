@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crime Analytics – Admin Dashboard</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="admindashboard.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+  const role = localStorage.getItem("role");
+
+  if (role !== "admin") {
+    alert("Access denied!");
+    window.location.href = "login.html";
+  }
+</script>
+
+</head>
+
+<body class="light">
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <div class="logo">CRIME ANALYTICS</div>
+    </div>
+
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li class="active">Dashboard</li>
+      </ul>
+
+      <button id="themeToggle">🌓</button>
+
+      <div class="profile">
+        Admin ▾
+        <div class="profile-menu">
+          <div onclick="openNotes()">Notes</div>
+          <div onclick="logout()">Sign Out</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <!-- FILTERS -->
+      <div class="filters">
+        <div class="dropdown">
+          <div class="dropdown-header">Year ▾</div>
+          <div class="dropdown-body" id="yearFilter"></div>
+        </div>
+
+        <div class="dropdown">
+          <div class="dropdown-header">Crime Type ▾</div>
+          <div class="dropdown-body" id="crimeFilter"></div>
+        </div>
+
+        <div class="dropdown">
+          <div class="dropdown-header">State ▾</div>
+          <div class="dropdown-body" id="stateFilter"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT -->
+    <main class="main-content">
+      <h1 class="text-center">CRIME ANALYTICS DASHBOARD – ADMIN</h1>
+
+      <!-- KPIs -->
+      <div class="kpi-row mb-3">
+        <div class="kpi shadow">Total Crimes<br><span id="kpiTotal">0</span></div>
+        <div class="kpi shadow">High Severity<br><span id="kpiHigh">0%</span></div>
+        <div class="kpi shadow">Open Cases<br><span id="kpiOpen">0%</span></div>
+        <div class="kpi shadow">Avg Response<br><span id="kpiResp">0 min</span></div>
+        <div class="kpi shadow">Closure Rate<br><span id="kpiClose">0%</span></div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="grid">
+        <div class="card crime-type-card" onclick="openModal('crimeType')">
+          <h3>Crimes by Type</h3>
+          <canvas id="crimeTypeChart"></canvas>
+        </div>
+
+        <div class="card" onclick="openModal('state')">
+          <h3>Top 4 States</h3>
+          <canvas id="stateChart"></canvas>
+        </div>
+
+        <div class="card" onclick="openModal('status')">
+          <h3>Open vs Closed</h3>
+          <canvas id="openClosedChart"></canvas>
+        </div>
+
+        <div class="card" onclick="openModal('month')">
+          <h3>Monthly Pattern</h3>
+          <canvas id="monthChart"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+
+
+
+
+
+<!-- MODAL -->
+<!-- <div id="modal" class="modal">
+  <div class="modal-box">
+    <span class="close" onclick="closeModal()">✖</span>
+    <div class="modal-left">
+      <canvas id="modalChart"></canvas>
+    </div>
+    <div class="modal-right" id="modalInfo"></div>
+  </div>
+</div> -->
+
+<!-- NOTES -->
+<div id="notes" class="notes">
+  <div class="notes-header">
+    <strong>Notes</strong>
+    <span onclick="closeNotes()">✖</span>
+  </div>
+  <textarea id="notesText" placeholder="Write notes here..."></textarea>
+</div>
+
+<!--logout button-->
+<button onclick="logoutAdmin()">Logout</button>
+
+
+<!-- PAGE VIEWS -->
+<div id="viewsWidget">👁 <span id="viewCount">0</span></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA3gQMnJh0L8Bc6CNRJ_oTh6xqabVP2-P4",
+  authDomain: "crime-rate-anaylsis.firebaseapp.com",
+  projectId: "crime-rate-anaylsis",
+  storageBucket: "crime-rate-anaylsis.firebasestorage.app",
+  messagingSenderId: "640438558864",
+  appId: "1:640438558864:web:42745954d83ea46cecf815"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// 🔐 ADMIN-ONLY ACCESS
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  if (snap.data().role !== "admin") {
+    window.location.href = "login.html";
+  }
+});
+
+// 🚪 ADMIN LOGOUT
+window.logoutAdmin = async function () {
+  await signOut(auth);
+  window.location.href = "login.html";
+};
+</script>
+<script>
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
+}
+
+// Sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar = document.querySelector('.sidebar');
+  
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      if (window.innerWidth <= 1024) {
+        if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+  }
+});
+</script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+  const role = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
+
+  const roleBadge = document.getElementById("roleBadge");
+  const userNameEl = document.getElementById("userName");
+
+  if (roleBadge) {
+    roleBadge.innerText = role === "admin" ? "ADMIN" : "USER";
+  }
+
+  if (userNameEl) {
+    userNameEl.innerText = userName || "User";
+  }
+
+});
+</script>
+
+
+
+
+
+
+
+
+<script src="admindashboard.js"></script>
+
+  
+
+
+</body>
+</html>

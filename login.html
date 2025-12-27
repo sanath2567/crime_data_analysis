@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Signup</title>
+
+  <!-- css link -->
+   <link rel="stylesheet" href="index.css">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+
+<body class="d-flex align-items-center justify-content-center min-vh-100" style="background-color: #072340;">
+
+<div class="position-relative shadow rounded-4 overflow-hidden bg-light"
+     style="max-width:800px;width:800px;height:430px; background-color: rgba(0, 0, 0, 0.020);">
+
+  <!-- MAIN WRAPPER -->
+  <div class="d-flex h-100">
+
+    <!-- SIGNUP -->
+    <div id="signupBox" class="w-50 p-4 text-center">
+      <h2 class="text-warning mb-4">Create Account</h2>
+
+      <form>
+        <!-- Role Selection -->
+  <div class="input-group my-3">
+    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+    <select id="signupRole" class="form-control">
+
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+
+        <div class="input-group mb-3">
+  <span class="input-group-text"><i class="bi bi-person"></i></span>
+  <input id="signupName" class="form-control" placeholder="User Name">
+</div>
+
+<div class="input-group mb-3">
+  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+  <input id="signupEmail" type="email" class="form-control" placeholder="Email">
+</div>
+
+<div class="input-group mb-3">
+  <span class="input-group-text"><i class="bi bi-lock"></i></span>
+  <input id="signupPassword" type="password" class="form-control" placeholder="Password">
+</div>
+
+<div class="input-group mb-3">
+  <span class="input-group-text"><i class="bi bi-lock"></i></span>
+  <input id="signupConfirm" type="password" class="form-control" placeholder="Confirm Password">
+</div>
+
+
+        
+
+        <button type="button" class="btn btn-warning px-4" onclick="signupUser()">
+  Sign up
+</button>
+
+        
+      </form>
+    </div>
+
+    <!-- LOGIN -->
+    <!-- LOGIN -->
+<div id="loginBox" class="w-50 p-4 text-center">
+  <h2 class="text-warning mb-2">Login</h2>
+  <p class="text-secondary">Welcome back User!</p>
+  <div class="input-group my-3">
+    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+    <select id="loginRole" class="form-control">
+
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+
+  <form>
+    <div class="input-group my-3">
+      <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+      <input id="loginEmail" type="email" class="form-control" placeholder="Email">
+    </div>
+
+    <div class="input-group my-3">
+      <span class="input-group-text"><i class="bi bi-lock"></i></span>
+      <input id="loginPassword" type="password" class="form-control" placeholder="Password">
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-warning px-4"
+      onclick="loginUser()">
+      Login
+    </button>
+  </form>
+</div>
+
+    </div>
+
+  <!-- BLACK OVERLAY -->
+  <div id="overlay"
+       class="position-absolute top-0 h-100 d-flex flex-column justify-content-center align-items-center text-center bg-dark text-white"
+       style="width:50%;right:0;transition:all .6s ease;">
+
+    <h3 id="overlayTitle">Hello, Friend!</h3>
+    <p id="overlayText1" class="px-4 text-secondary">
+      Enter your personal details and start journey with us!
+    </p>
+    <p id="overlayText2" class="px-4 text-secondary">
+      I already have an account.
+    </p>
+
+    <button id="overlayBtn"
+            class="btn btn-outline-light mx-3"
+            onclick="showSignup()">login</button>
+  </div>
+
+</div>
+
+<script>
+    
+
+
+  const overlay = document.getElementById("overlay");
+  const overlayTitle = document.getElementById("overlayTitle");
+  const overlayText1 = document.getElementById("overlayText1");
+  const overlayText2 = document.getElementById("overlayText2");
+  const overlayBtn = document.getElementById("overlayBtn");
+
+  function showSignup() {
+    overlay.style.right = "50%";
+
+    overlayTitle.innerText = "Welcome back!";
+    overlayText1.innerText ="To keep connected with us please login!"
+    overlayText2.innerText ="Don't have an account?"
+    overlayBtn.innerHTML = "Sign up";
+    overlayBtn.onclick = showLogin;
+  }
+
+  function showLogin() {
+    overlay.style.right = "0";
+
+    overlayTitle.innerText = "Hello, Friend!";
+    overlayText1.innerText = "Enter your personal details and start journey with us!";
+    overlayText2.innerText = "I already have an account.";
+    overlayBtn.innerText = "login";
+    overlayBtn.onclick = showSignup;
+  }
+
+
+
+</script>
+
+
+  
+
+  <!-- 🔥 Firebase Connection Code (STEP 5) -->
+   <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* Firebase Config */
+const firebaseConfig = {
+  apiKey: "AIzaSyA3gQMnJh0L8Bc6CNRJ_oTh6xqabVP2-P4",
+  authDomain: "crime-rate-anaylsis.firebaseapp.com",
+  projectId: "crime-rate-anaylsis",
+  storageBucket: "crime-rate-anaylsis.firebasestorage.app",
+  messagingSenderId: "640438558864",
+  appId: "1:640438558864:web:42745954d83ea46cecf815"
+};
+
+/* Init */
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ================= SIGNUP ================= */
+window.signupUser = async function () {
+
+  const name = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const password = document.getElementById("signupPassword").value;
+  const confirm = document.getElementById("signupConfirm").value;
+  const role = document.getElementById("signupRole").value;
+
+
+  if (!name || !email || !password || !confirm) {
+    alert("❌ Fill all fields");
+    return;
+  }
+
+  if (password !== confirm) {
+    alert("❌ Passwords do not match");
+    return;
+  }
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+    await setDoc(doc(db, "users", cred.user.uid), {
+      name: name,
+      email: email,
+      role: role,
+      createdAt: new Date()
+    });
+
+    alert("✅ Signup successful! Please login.");
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+
+/* ================= LOGIN ================= */
+window.loginUser = async function () {
+  try {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+
+    
+
+    // 🔥 Get role from Firestore
+    const snap = await getDoc(doc(db, "users", cred.user.uid));
+
+    if (!snap.exists()) {
+      alert("No user record found");
+      return;
+    }
+
+    const role = snap.data().role;
+    const name = snap.data().name || email;
+
+// store for dashboard use
+localStorage.setItem("userName", name);
+localStorage.setItem("userEmail", email);
+
+
+    // ✅ Store login state correctly
+localStorage.setItem("isLoggedIn", "true");
+localStorage.setItem("role", role);
+// Clear login fields
+document.getElementById("loginEmail").value = "";
+document.getElementById("loginPassword").value = "";
+// redirect 
+if (role === "admin") {
+  window.location.href = "admindashboard.html";
+} else {
+  window.location.href = "userdashboard.html";
+}
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+
+
+    
+
+
+
+
+
+</script>
+
+
+
+
+
+
+</body>
+</html>
