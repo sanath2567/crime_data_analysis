@@ -145,7 +145,7 @@ function update() {
 }
 
 /* LOAD */
-fetch("final_format.json")
+fetch("/final_format.json")
   .then(r => r.json())
   .then(d => {
     rawData = d;
