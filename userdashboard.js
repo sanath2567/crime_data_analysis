@@ -4,7 +4,7 @@ let barChart, pieChart, lineChart, clusterChart, stackedChart;
 
 /* ================= LOAD DATA ================= */
 
-fetch("/final_format.json")
+fetch("/public/final_format.json")
   .then(res => res.json())
   .then(data => {
     fullData = data;
